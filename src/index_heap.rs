@@ -123,19 +123,19 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
     }
 
     /// Updates the key of an element if the new key is smaller than the old key.
-    /// Does nothing if the new key is larger.
-    /// Panics if the element is not part of the queue.
+    /// Panics if the element is not part of the queue or if the new key is larger.
     pub fn decrease_key(&mut self, element: T) {
         let position = self.positions[element.as_index()];
+        assert!(element <= self.data[position]);
         self.data[position] = element;
         self.move_up_in_tree(position);
     }
 
     /// Updates the key of an element if the new key is larger than the old key.
-    /// Does nothing if the new key is smaller.
-    /// Panics if the element is not part of the queue.
+    /// Panics if the element is not part of the queue or if the new key is smaller.
     pub fn increase_key(&mut self, element: T) {
         let position = self.positions[element.as_index()];
+        assert!(element >= self.data[position]);
         self.data[position] = element;
         self.move_down_in_tree(position);
     }
