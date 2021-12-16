@@ -3,7 +3,7 @@ use stud_rust_base::{io::*, time::report_time, types::*};
 use std::{env, error::Error, path::Path};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let arg = &env::args().skip(1).next().expect("No directory arg given");
+    let arg = &env::args().nth(1).expect("No directory arg given");
     let path = Path::new(arg);
 
     let first_out = Vec::<EdgeId>::load_from(path.join("first_out"))?;

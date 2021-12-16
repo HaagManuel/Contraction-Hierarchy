@@ -168,10 +168,7 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
             let mut hole = Hole::new(&mut self.data, position);
 
             loop {
-                if let Some(smallest_child) =
-                    IndexdMinHeap::<T>::children_index_range(position, heap_size)
-                        .min_by_key(|&child_index| hole.get(child_index))
-                {
+                if let Some(smallest_child) = IndexdMinHeap::<T>::children_index_range(position, heap_size).min_by_key(|&child_index| hole.get(child_index)) {
                     if hole.get(smallest_child) >= hole.element() {
                         self.positions[hole.element().as_index()] = position;
                         return; // no child is smaller
@@ -218,11 +215,7 @@ impl<'a, T> Hole<'a, T> {
     unsafe fn new(data: &'a mut [T], pos: usize) -> Self {
         debug_assert!(pos < data.len());
         let elt = ptr::read(&data[pos]);
-        Hole {
-            data,
-            elt: Some(elt),
-            pos,
-        }
+        Hole { data, elt: Some(elt), pos }
     }
 
     /// Returns a reference to the element removed.

@@ -51,7 +51,7 @@ impl<T: Copy> DataBytes for [T] {
 
 impl<T: Copy> DataBytes for Vec<T> {
     fn data_bytes(&self) -> &[u8] {
-        &self[..].data_bytes()
+        self[..].data_bytes()
     }
 }
 
