@@ -46,6 +46,24 @@ impl From<Vec<(NodeId, DirectedWeightedEdge)>> for EdgeList {
         EdgeList{num_nodes: n, num_edges: m, degree: deg, edges: edge_list}
     }
 }
+
+
+//first_out, head, weight
+impl From<(Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>)> for EdgeList {
+    fn from(input: (Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>)) -> Self {
+        let mut edge_list: Vec<(NodeId, DirectedWeightedEdge)> = Vec::new();
+        let (first_out, head, weight) = input;
+        edge_list.reserve_exact(head.len());
+        let n: usize = first_out.len() - 1;
+        for v in 0..n {
+            for e in first_out[v]..first_out[v + 1] {
+                edge_list.push((v as NodeId, DirectedWeightedEdge::from_values(head[e as usize], weight[e as usize])))
+            }
+        }
+        return edge_list.into();
+    }
+}
+
 impl Graph for EdgeList {
     fn num_nodes(&self) -> usize { self.num_nodes}
     fn num_arcs(&self) -> usize { self.num_edges}

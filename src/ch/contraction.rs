@@ -7,7 +7,7 @@ use crate::graph::nodes_edges::*;
 use crate::datastructure::index_heap::*;
 
 // const MAX_WITNESS_SEARCH_STEPS: usize = 50_000;
-const MAX_WITNESS_SEARCH_STEPS_HEURISTIC: usize = 100; //smaller witness search for heurstic for faster preprocessing
+const MAX_WITNESS_SEARCH_STEPS_HEURISTIC: usize = 1000; //smaller witness search for heurstic for faster preprocessing
 const MAX_WITNESS_SEARCH_STEPS: usize = 10_000;
 
 pub struct Contraction<'a> {
@@ -267,9 +267,6 @@ impl<'a> Contraction<'a> {
             heap.push(State{heuristic: heuristic, node: i as NodeId});
         }
         //pop and assign node with min heuristic ~ low number of shortcuts
-        let mut count_pops: usize = 0;
-        let mut count_round: usize = 0;
-        let interval: usize = 1000;
         while !heap.is_empty() {
             if ordering.len() % 10000 == 0 { println!("{}/{n}, pq {}, shortcuts {}", ordering.len(), heap.len(), self.num_shortcuts);}
             let v: NodeId = heap.pop().unwrap().node;

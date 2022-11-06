@@ -138,3 +138,30 @@ pub fn read_coordinates(file_path: &str) -> Vec<(Coordinate, Coordinate)> {
     })
     .collect()
 }
+
+pub fn write_ordering(ordering: Vec<NodeId>, path: &str) {
+    let data: Vec<String> = ordering.iter().map(|&x| x.to_string()).collect();
+    let mut out = data.join(" ");
+    out.push('\n');
+    std::fs::write(path, out).expect("Failed to read to file {path}");
+}
+
+pub fn read_ordering(path: &str) -> Vec<NodeId> {
+    let mut contents = std::fs::read_to_string(path).expect("Failed to read file {path}");
+    contents.truncate(contents.len() - 1); //remove \n
+    return contents.split(" ").map(|s| s.parse::<NodeId>().expect(s)).collect();
+}
+
+pub fn read_binary_graph_travel(path: &Path) -> (Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>) {
+    let first_out = Vec::<EdgeId>::load_from(path.join("first_out")).unwrap();
+    let head = Vec::<NodeId>::load_from(path.join("head")).unwrap();
+    let weights = Vec::<Weight>::load_from(path.join("travel_time")).unwrap();
+    (first_out, head, weights)
+}
+
+pub fn read_binary_graph_geo(path: &Path) -> (Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>) {
+    let first_out = Vec::<EdgeId>::load_from(path.join("first_out")).unwrap();
+    let head = Vec::<NodeId>::load_from(path.join("head")).unwrap();
+    let weights = Vec::<Weight>::load_from(path.join("geo_distance")).unwrap();
+    (first_out, head, weights)
+}
