@@ -44,7 +44,6 @@ impl CHGraph {
         let mut bwd_list: AdjacencyList = rev_edge_list.into();
 
         let mut builder: Contraction = Contraction::new(&mut fwd_list, &mut bwd_list, dij_data1, dij_data2);
-        // let ordering = builder.simple_bottom_up();
         let ordering = builder.bottom_up(true);
         
         fwd_list.sort_lists(); // sorting is destroyed during contraction

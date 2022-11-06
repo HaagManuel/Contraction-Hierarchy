@@ -77,9 +77,3 @@ fn main(){
     }
     benchmark_random(edge_list, num_start)
 }
-
-
-// fn main() {
-//     let weighted = "../inputs/USA-road-d.NY.gr";
-//     let edge_list: EdgeList = io::from_file_weighted(weighted).into();
-// }

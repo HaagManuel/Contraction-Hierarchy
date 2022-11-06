@@ -1,3 +1,4 @@
 /target
 /inputs
+/outputs
 **/*.rs.bk
