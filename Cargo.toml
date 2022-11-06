@@ -1,5 +1,8 @@
 [package]
 name = "stud-rust-base"
 version = "0.1.0"
-authors = ["Tim Zeitz <tim.zeitz@kit.edu>"]
+authors = ["Tim Zeitz <tim.zeitz@kit.edu>", "Manuel Haag"]
 edition = '2021'
+
+[dependencies]
+rand = "0.8"

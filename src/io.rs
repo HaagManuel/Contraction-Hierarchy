@@ -14,6 +14,10 @@
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
+
+use crate::graph::definitions::*;
+use crate::graph::nodes_edges::*;
+
 use std::{
     fs::{metadata, File},
     io::{prelude::*, Result},
@@ -106,4 +110,31 @@ impl<T: Default + Copy> Load for Vec<T> {
         let num_elements = num_bytes / mem::size_of::<T>();
         (0..num_elements).map(|_| T::default()).collect()
     }
+}
+
+
+pub fn from_file_weighted(file_path: &str) -> Vec<(NodeId, DirectedWeightedEdge)> {
+    let mut edge_list: Vec<(NodeId,DirectedWeightedEdge)> = Vec::new();
+    for line in std::fs::read_to_string(file_path).expect("Failed to read the file {file_path}").lines() {
+        let vec: Vec<&str> = line.splitn(3, ' ').collect();
+        let a = vec[0].parse::<NodeId>().unwrap() - 1;
+        let b = vec[1].parse::<NodeId>().unwrap() - 1;
+        let w = vec[2].parse::<Weight>().unwrap();
+        edge_list.push((a.clone(), DirectedWeightedEdge{to: b.clone(), weight: w.clone()}));
+        edge_list.push((b, DirectedWeightedEdge{to: a, weight: w}));
+    }
+    edge_list
+}
+
+pub fn read_coordinates(file_path: &str) -> Vec<(Coordinate, Coordinate)> {
+    std::fs::read_to_string(file_path)
+    .expect("Failed to read the file {file_path}")
+    .lines()
+    .map(|line| {
+        let vec: Vec<&str> = line.splitn(3, ' ').collect();
+        let x = vec[1].parse::<Coordinate>().unwrap() - 1;
+        let y = vec[2].parse::<Coordinate>().unwrap();
+        (x,y)
+    })
+    .collect()
 }

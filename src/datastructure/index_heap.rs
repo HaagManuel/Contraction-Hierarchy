@@ -1,3 +1,7 @@
+
+//code from Tim Zeitz -> https://github.com/kit-algo/rust_road_router/blob/master/engine/src/datastr/index_heap.rs
+
+
 //! A priority queue implemented with a 4-ary heap.
 //!
 //! Insertion and popping the minimal element have `O(log n)` time complexity.
@@ -7,7 +11,7 @@
 //! # Examples
 //!
 //! ```
-//! use stud_rust_base::index_heap::{Indexing, IndexdMinHeap};
+//! use rust_road_router::datastr::index_heap::{Indexing, IndexdMinHeap};
 //!
 //! #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 //! pub struct State {
@@ -33,10 +37,7 @@
 //!
 //! ```
 
-use std;
-use std::cmp::min;
-use std::mem::swap;
-use std::ptr;
+use std::{cmp::min, mem::swap, ptr};
 
 /// A trait to map elements in a heap to a unique index.
 /// The element type of the `IndexdMinHeap` has to implement this trait.
@@ -50,8 +51,8 @@ pub trait Indexing {
 /// The interface mirros the standard library BinaryHeap (except for the reversed order).
 /// Only the methods necessary for dijkstras algorithm are implemented.
 /// In addition, `increase_key` and `decrease_key` methods are available.
-#[derive(Debug)]
-pub struct IndexdMinHeap<T: Ord + Indexing> {
+#[derive(Debug, Clone)]
+pub struct IndexdMinHeap<T> {
     positions: Vec<usize>,
     data: Vec<T>,
 }
@@ -63,9 +64,9 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
     /// Creates an empty `IndexdMinHeap` as a min-heap.
     /// The indices (as defined by the `Indexing` trait) of all inserted elements
     /// will have to be between in `[0, max_index)`
-    pub fn new(max_index: usize) -> IndexdMinHeap<T> {
+    pub fn new(max_id: usize) -> IndexdMinHeap<T> {
         IndexdMinHeap {
-            positions: vec![INVALID_POSITION; max_index],
+            positions: vec![INVALID_POSITION; max_id],
             data: Vec::new(),
         }
     }
@@ -85,6 +86,15 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
         self.positions[id] != INVALID_POSITION
     }
 
+    pub fn get(&self, id: usize) -> Option<&T> {
+        self.data.get(self.positions[id])
+    }
+
+    /// Returns an slice of all elements in no particular guaranteed order.
+    pub fn elements(&self) -> &[T] {
+        &self.data
+    }
+
     /// Drops all items from the heap.
     pub fn clear(&mut self) {
         for element in &self.data {
@@ -94,6 +104,7 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
     }
 
     /// Returns a reference to the smallest item in the heap, or None if it is empty.
+    #[allow(dead_code)]
     pub fn peek(&self) -> Option<&T> {
         self.data.first()
     }
@@ -112,6 +123,13 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
         })
     }
 
+    /// Pushes an item onto the binary heap if its not yet in the queue.
+    pub fn push_unless_contained(&mut self, element: T) {
+        if !self.contains_index(element.as_index()) {
+            self.push(element)
+        }
+    }
+
     /// Pushes an item onto the binary heap.
     /// Panics if an element with the same index already exists.
     pub fn push(&mut self, element: T) {
@@ -122,63 +140,99 @@ impl<T: Ord + Indexing> IndexdMinHeap<T> {
         self.move_up_in_tree(insert_position);
     }
 
-    /// Updates the key of an element if the new key is smaller than the old key.
-    /// Panics if the element is not part of the queue or if the new key is larger.
+    // Updates the key of an element.
+    pub fn update_key(&mut self, element: T) {
+        match element.cmp(&self.data[self.positions[element.as_index()]]) {
+            std::cmp::Ordering::Less => self.decrease_key(element),
+            std::cmp::Ordering::Greater => self.increase_key(element),
+            _ => (),
+        }
+    }
+
+    // Updates the key of an element if the new key is smaller than the old key.
+    // Does nothing if the new key is larger.
     pub fn decrease_key(&mut self, element: T) {
         let position = self.positions[element.as_index()];
-        assert!(element <= self.data[position]);
         self.data[position] = element;
         self.move_up_in_tree(position);
     }
 
-    /// Updates the key of an element if the new key is larger than the old key.
-    /// Panics if the element is not part of the queue or if the new key is smaller.
+    // Updates the key of an element if the new key is larger than the old key.
+    // Does nothing if the new key is smaller.
     pub fn increase_key(&mut self, element: T) {
         let position = self.positions[element.as_index()];
-        assert!(element >= self.data[position]);
         self.data[position] = element;
         self.move_down_in_tree(position);
     }
 
-    fn move_up_in_tree(&mut self, position: usize) {
-        unsafe {
-            let mut position = position;
-            let mut hole = Hole::new(&mut self.data, position);
+    pub fn drain(&mut self) -> impl Iterator<Item = T> + '_ {
+        self.data.drain(..).inspect(|item| self.positions[item.as_index()] = INVALID_POSITION)
+    }
 
-            while position > 0 {
-                let parent = (position - 1) / TREE_ARITY;
+    fn move_up_in_tree(&mut self, mut position: usize) {
+        while position > 0 {
+            let parent = (position - 1) / TREE_ARITY;
 
-                if hole.get(parent) < hole.element() {
+            unsafe {
+                if self.data.get_unchecked(parent) < self.data.get_unchecked(position) {
                     break;
                 }
 
-                self.positions[hole.get(parent).as_index()] = position;
-                hole.move_to(parent);
-                position = parent;
+                self.positions
+                    .swap(self.data.get_unchecked(parent).as_index(), self.data.get_unchecked(position).as_index());
+                self.data.swap(parent, position);
             }
-
-            self.positions[hole.element().as_index()] = position;
+            position = parent;
         }
     }
 
+    // fn move_up_in_tree(&mut self, position: usize) {
+    //     unsafe {
+    //         let mut hole = Hole::new(&mut self.data, position);
+
+    //         while hole.pos > 0 {
+    //             let parent = (hole.pos - 1) / TREE_ARITY;
+
+    //             if hole.get(parent) < hole.element() {
+    //                 break;
+    //             }
+
+    //             *self.positions.get_unchecked_mut(hole.get(parent).as_index()) = hole.pos;
+    //             hole.move_to(parent);
+    //         }
+
+    //         *self.positions.get_unchecked_mut(hole.element().as_index()) = hole.pos;
+    //     }
+    // }
+
+    // fn move_down_in_tree(&mut self, mut position: usize) {
+    //     while let Some(smallest_child) = IndexdMinHeap::<T>::children_index_range(position, self.len()).min_by_key(|&child_index| unsafe { self.data.get_unchecked(child_index) }) {
+    //         unsafe {
+    //             if self.data.get_unchecked(smallest_child) >= self.data.get_unchecked(position) { return; } // no child is smaller
+
+    //             self.positions.swap(self.data.get_unchecked(position).as_index(), self.data.get_unchecked(smallest_child).as_index());
+    //             self.data.swap(smallest_child, position);
+    //             position = smallest_child;
+    //         }
+    //     }
+    // }
+
     fn move_down_in_tree(&mut self, position: usize) {
         unsafe {
-            let mut position = position;
             let heap_size = self.len();
             let mut hole = Hole::new(&mut self.data, position);
 
             loop {
-                if let Some(smallest_child) = IndexdMinHeap::<T>::children_index_range(position, heap_size).min_by_key(|&child_index| hole.get(child_index)) {
+                if let Some(smallest_child) = IndexdMinHeap::<T>::children_index_range(hole.pos, heap_size).min_by_key(|&child_index| hole.get(child_index)) {
                     if hole.get(smallest_child) >= hole.element() {
-                        self.positions[hole.element().as_index()] = position;
+                        *self.positions.get_unchecked_mut(hole.element().as_index()) = hole.pos;
                         return; // no child is smaller
                     }
 
-                    self.positions[hole.get(smallest_child).as_index()] = position;
+                    *self.positions.get_unchecked_mut(hole.get(smallest_child).as_index()) = hole.pos;
                     hole.move_to(smallest_child);
-                    position = smallest_child;
                 } else {
-                    self.positions[hole.element().as_index()] = position;
+                    *self.positions.get_unchecked_mut(hole.element().as_index()) = hole.pos;
                     return; // no children at all
                 }
             }
