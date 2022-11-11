@@ -9,6 +9,7 @@ pub fn report_time<Out, F: FnOnce() -> Out>(name: &str, f: F) -> Out {
     eprintln!("starting {}", name);
     let res = f();
     eprintln!("done {} - took: {}s", name, start.elapsed().as_secs_f64());
+    eprintln!("");
     res
 }
 

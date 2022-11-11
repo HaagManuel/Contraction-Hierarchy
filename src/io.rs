@@ -152,16 +152,11 @@ pub fn read_ordering(path: &str) -> Vec<NodeId> {
     return contents.split(" ").map(|s| s.parse::<NodeId>().expect(s)).collect();
 }
 
-pub fn read_binary_graph_travel(path: &Path) -> (Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>) {
-    let first_out = Vec::<EdgeId>::load_from(path.join("first_out")).unwrap();
-    let head = Vec::<NodeId>::load_from(path.join("head")).unwrap();
-    let weights = Vec::<Weight>::load_from(path.join("travel_time")).unwrap();
-    (first_out, head, weights)
-}
 
-pub fn read_binary_graph_geo(path: &Path) -> (Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>) {
-    let first_out = Vec::<EdgeId>::load_from(path.join("first_out")).unwrap();
-    let head = Vec::<NodeId>::load_from(path.join("head")).unwrap();
-    let weights = Vec::<Weight>::load_from(path.join("geo_distance")).unwrap();
+pub fn read_binary_graph<P: AsRef<Path>>(path_graph: P, path_weight: P) -> (Vec::<EdgeId>, Vec::<NodeId>, Vec::<Weight>) {
+    let dir_graph = path_graph.as_ref();
+    let first_out = Vec::<EdgeId>::load_from(dir_graph.join("first_out")).unwrap();
+    let head = Vec::<NodeId>::load_from(dir_graph.join("head")).unwrap();
+    let weights = Vec::<Weight>::load_from(path_weight).unwrap();
     (first_out, head, weights)
 }

@@ -18,7 +18,6 @@ impl EdgeList {
             rev_edges[i] = (e.to, DirectedWeightedEdge::from_values(from, e.weight()));
             rev_degree[e.to as usize] += 1;
         }
-
         EdgeList { num_nodes: self.num_nodes, num_edges: self.num_edges, degree: rev_degree, edges: rev_edges }
     }
 

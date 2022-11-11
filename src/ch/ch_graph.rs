@@ -14,6 +14,25 @@ pub struct CHGraph {
 }
 
 impl CHGraph {
+
+    //inverts permutation
+    fn ranks_from_ordering(ordering: &Vec<NodeId>) -> Vec<NodeId> {
+        let mut ranks: Vec<NodeId> = vec![0; ordering.len()];
+        for i in 0..ordering.len() {
+            ranks[ordering[i] as usize] = i as NodeId;
+        }
+        return ranks;
+    }
+
+    pub fn from_augmented_graph(edge_list: EdgeList, ordering: Vec<NodeId>) -> Self {
+        let ranks: Vec<NodeId> = CHGraph::ranks_from_ordering(&ordering);
+        let mut edges: Vec<(NodeId, DirectedWeightedEdge)> = edge_list.edges;
+        edges = edges.into_iter().filter(|&(from, e)| ranks[from as usize] < ranks[e.to as usize]).collect();
+        let fwd_list: EdgeList = edges.into();
+        let bwd_list: EdgeList = fwd_list.reverse_edge_list();
+        return CHGraph { fwd_graph: fwd_list.into() , bwd_graph: bwd_list.into()};
+    }
+
     pub fn from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>, dij_data1: &mut DijkstraData, dij_data2: &mut DijkstraData) -> Self {
         let rev_edge_list: EdgeList = edge_list.reverse_edge_list();
 
@@ -94,6 +113,16 @@ pub struct CHGraphRunner {
 }
 
 impl CHGraphRunner {
+    pub fn from_augmented_graph(edge_list: EdgeList, ordering: Vec<NodeId>) -> Self {
+        let data1: DijkstraData = DijkstraData::new(edge_list.num_nodes());
+        let data2: DijkstraData = DijkstraData::new(edge_list.num_nodes());
+        let ch: CHGraph =  CHGraph::from_augmented_graph(edge_list, ordering);
+        CHGraphRunner { 
+            data1: data1, 
+            data2: data2, 
+            ch: ch}
+    }
+
     pub fn from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>) -> Self {
         let mut data1: DijkstraData = DijkstraData::new(edge_list.num_nodes());
         let mut data2: DijkstraData = DijkstraData::new(edge_list.num_nodes());
