@@ -1,4 +1,5 @@
 use stud_rust_base::ch::ch_graph::CHGraph;
+use stud_rust_base::ch::contraction::{BottomUpConfig, ContractionConfig};
 use stud_rust_base::dijkstra::*;
 use stud_rust_base::graph::{definitions::*, edge_list::{*}, nodes_edges::*, adjacency_array::AdjacencyArray};
 use stud_rust_base::graph_gen;
@@ -43,7 +44,7 @@ fn test_random_ch_all(num_nodes: usize, num_edges: usize, repetitions: usize) {
         let mut data3: DijkstraData = DijkstraData::new(num_nodes);
         
         let array: AdjacencyArray = edge_list.clone().into();
-        let (ch, _) = CHGraph::bottom_up_construction(edge_list, &mut data2, &mut data3);
+        let (ch, _) = CHGraph::bottom_up_construction(edge_list, &mut data2, &mut data3, ContractionConfig::default(),             BottomUpConfig::default());
 
         let mut dij: Dijkstra<DirectedWeightedEdge, AdjacencyArray> = Dijkstra::new(&array, &mut data1);
         let pot: ZeroPotential = ZeroPotential {};

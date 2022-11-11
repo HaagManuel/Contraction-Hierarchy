@@ -6,16 +6,48 @@ use crate::graph::definitions::*;
 use crate::graph::nodes_edges::*;
 use crate::datastructure::index_heap::*;
 
-// const MAX_WITNESS_SEARCH_STEPS: usize = 50_000;
-const MAX_WITNESS_SEARCH_STEPS_HEURISTIC: usize = 1000; //smaller witness search for heurstic for faster preprocessing
-const MAX_WITNESS_SEARCH_STEPS: usize = 10_000;
+pub struct ContractionConfig {
+    max_witness_search_heuristic: usize,
+    max_witness_search_steps: usize,
+}
+
+impl ContractionConfig {
+    pub fn new(max_witness_search_heuristic: usize, max_witness_search_steps: usize) -> Self {
+        ContractionConfig { max_witness_search_heuristic: max_witness_search_heuristic, max_witness_search_steps: max_witness_search_steps}
+    }
+}
+
+impl Default for ContractionConfig {
+    fn default() -> Self {
+        Self { max_witness_search_heuristic: 1000, max_witness_search_steps: 10_000 }
+    }
+}
+
+pub struct BottomUpConfig {
+    lazy: bool,
+    update_interval: usize,
+    fraction_pops: f64,
+}
+
+impl BottomUpConfig {
+    pub fn new(lazy: bool, update_interval: usize, fraction_pops: f64) -> Self {
+        BottomUpConfig { lazy: lazy, update_interval: update_interval, fraction_pops: fraction_pops }
+    }
+}
+
+impl Default for BottomUpConfig {
+    fn default() -> Self {
+        Self { lazy: true, update_interval: 1000, fraction_pops: 1.0f64 }
+    }
+}
 
 pub struct Contraction<'a> {
     fwd_graph: &'a mut AdjacencyList,
     bwd_graph: &'a mut AdjacencyList,
     dij_data1: &'a mut DijkstraData,
     dij_data2: &'a mut DijkstraData,
-    num_shortcuts: usize
+    num_shortcuts: usize,
+    config: ContractionConfig,
 }
 
 struct Shortcut {
@@ -35,25 +67,17 @@ impl Indexing for State {
     }
 }
 
-pub struct LazyContractionConfig {
-    update_interval: usize,
-    fraction_pops: f64,
-}
 
-impl Default for LazyContractionConfig {
-    fn default() -> Self {
-        Self { update_interval: 1000, fraction_pops: 1.0f64 }
-    }
-}
 
 impl<'a> Contraction<'a> {
-    pub fn new(fwd_gr: &'a mut AdjacencyList, bwd_gr: &'a mut AdjacencyList, _dij_data1: &'a mut DijkstraData, _dij_data2: &'a mut DijkstraData) -> Self {
+    pub fn new(fwd_gr: &'a mut AdjacencyList, bwd_gr: &'a mut AdjacencyList, _dij_data1: &'a mut DijkstraData, _dij_data2: &'a mut DijkstraData, config: ContractionConfig) -> Self {
         Contraction { 
             fwd_graph: fwd_gr,
             bwd_graph: bwd_gr, 
             dij_data1: _dij_data1,
             dij_data2: _dij_data2,
             num_shortcuts: 0,
+            config: config,
         }
     }
 
@@ -105,7 +129,7 @@ impl<'a> Contraction<'a> {
             start: shortcut.from,
             target: shortcut.to, 
             cap: Some(shortcut.weight),
-            max_steps: Some(MAX_WITNESS_SEARCH_STEPS),
+            max_steps: Some(self.config.max_witness_search_steps),
             forbidden_node: None,
         };
         let res = Dijkstra::generic_bidrektional_dijkstra::<SmallerQueue, WitnessSearchStop>(config, &mut fwd_dij, &mut bwd_dij); 
@@ -120,7 +144,7 @@ impl<'a> Contraction<'a> {
             start: shortcut.from,
             target: shortcut.to, 
             cap: Some(shortcut.weight),
-            max_steps: Some(MAX_WITNESS_SEARCH_STEPS_HEURISTIC),
+            max_steps: Some(self.config.max_witness_search_heuristic),
             forbidden_node: Some(node),
         };
         let res = Dijkstra::generic_bidrektional_dijkstra::<SmallerQueue, WitnessSearchStop>(config, &mut fwd_dij, &mut bwd_dij); 
@@ -177,20 +201,20 @@ impl<'a> Contraction<'a> {
         }
     }
 
-    pub fn bottom_up(&mut self, lazy: bool) -> Vec<NodeId> {
-        if lazy {
-            return self.lazy_bottom_up(LazyContractionConfig::default());
+    pub fn bottom_up(&mut self, config: BottomUpConfig) -> Vec<NodeId> {
+        if config.lazy {
+            return self.lazy_bottom_up(config);
         } else {
             return self.simple_bottom_up();
         }
     }
 
-    fn lazy_bottom_up(&mut self, config: LazyContractionConfig) -> Vec<NodeId> {
+    fn lazy_bottom_up(&mut self, config: BottomUpConfig) -> Vec<NodeId> {
         let n: usize = self.fwd_graph.num_nodes();
         let mut ordering: Vec<NodeId> = Vec::new(); //unimportant nodes first
         let mut level: Vec<NodeId> = vec![0; n];
         ordering.reserve_exact(n);
-        let mut heap = IndexdMinHeap::new(n);
+        let mut heap: IndexdMinHeap<State> = IndexdMinHeap::new(n);
 
         //init pq
         for i in 0..n {
@@ -198,20 +222,19 @@ impl<'a> Contraction<'a> {
             heap.push(State{heuristic: self.net_gain_edges(w, &level), node: i as NodeId});
         }
 
-        //pop and assign node with min heuristic ~ low number of shortcuts
         let mut count_pops: usize = 0;
         let mut count_round: usize = 0;
-        // let interval: usize = config.update_interval;
-        // let frac: f64 = config.fraction_pops;
-        let interval: usize = 10000;
-        let frac: f64 = 1.0;
-        // let frac: f64 = 0.75;
+        let interval: usize = config.update_interval;
+        let frac: f64 = config.fraction_pops;
+        
         while !heap.is_empty() {
             if ordering.len() % 10000 == 0 { println!("{}/{n}, pq {}, shortcuts {}", ordering.len(), heap.len(), self.num_shortcuts);}
-            if count_round % interval == interval - 1 { 
+            count_round += 1;
+            if count_round % interval == 0 { 
+                count_round = 0;
                 let lower: usize = ((interval as f64) * frac).floor() as usize;
                 if count_pops >= lower { //update all nodes
-                    println!("complete update {}", ordering.len());
+                    // println!("complete update {}", ordering.len());
                     for w in self.fwd_graph.nodes() {
                         if heap.contains_index(w as usize) {
                             heap.update_key(State { heuristic: self.net_gain_edges(w, &level), node: w });
@@ -220,7 +243,6 @@ impl<'a> Contraction<'a> {
                 }
                 count_pops = 0;
             }
-            count_round += 1;
 
             //lazy update
             let v: NodeId = heap.peek().unwrap().node;
@@ -233,8 +255,8 @@ impl<'a> Contraction<'a> {
             heap.pop();
             ordering.push(v);
             self.contract_node(v);
-            count_pops += 1;
             self.update_level(v, &mut level);
+            count_pops += 1;
         }
         return ordering;
     }
@@ -246,26 +268,15 @@ impl<'a> Contraction<'a> {
         let mut level: Vec<NodeId> = vec![0; n];
         ordering.reserve_exact(n);
 
-        #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
-        struct State {
-            pub heuristic: Weight,
-            pub node: NodeId,
-        }
-        impl Indexing for State {
-            fn as_index(&self) -> usize {
-                self.node as usize
-            }
-        }
-        let mut heap = IndexdMinHeap::new(n);
+        let mut heap: IndexdMinHeap<State> = IndexdMinHeap::new(n);
 
         //init pq
         for i in 0..n {
-            // if i % 1000 == 0 { println!("{i}/{n}");}
             let w = i as NodeId;
             let heuristic: Weight = self.net_gain_edges(w, &level);
-            // let heuristic: f64 = self.relative_gain(w, &level);
             heap.push(State{heuristic: heuristic, node: i as NodeId});
         }
+
         //pop and assign node with min heuristic ~ low number of shortcuts
         while !heap.is_empty() {
             if ordering.len() % 10000 == 0 { println!("{}/{n}, pq {}, shortcuts {}", ordering.len(), heap.len(), self.num_shortcuts);}
@@ -340,7 +351,7 @@ mod tests {
 
         let target_fwd: AdjacencyList = c_edge_list.clone().into();
 
-        let mut contr: Contraction = Contraction::new(&mut fwd, &mut bwd, &mut dd, &mut dd2);
+        let mut contr: Contraction = Contraction::new(&mut fwd, &mut bwd, &mut dd, &mut dd2, ContractionConfig::default());
         contr.contract_node(0);
         fwd.sort_lists();
         bwd.sort_lists();

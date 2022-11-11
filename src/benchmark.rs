@@ -5,6 +5,8 @@ use std::time::Instant;
 use rand::distributions::{Distribution, Uniform};
 
 use crate::ch::ch_graph::CHGraph;
+use crate::ch::contraction::BottomUpConfig;
+use crate::ch::contraction::ContractionConfig;
 use crate::dijkstra::*;
 use crate::graph::adjacency_array::AdjacencyArray;
 use crate::graph::adjacency_list::AdjacencyList;
@@ -27,7 +29,7 @@ G: Graph + IncidentEdges<DirectedWeightedEdge> {
     let mut ranks: Vec<(Distance, usize)> = std::iter::zip(distances, 0..).collect();
     let mut pow2: Weight = 1;
     ranks.sort();
-    for (d, i) in ranks.iter().filter(|(d, i)| *d < crate::dijkstra::INFINITY) {
+    for (d, i) in ranks.iter().filter(|(d, _)| *d < crate::dijkstra::INFINITY) {
         if *d >= pow2 {
             targets.push((*i as NodeId, *d));
             while *d >= pow2 {pow2 *= 2;}
@@ -41,7 +43,7 @@ fn compute_start_targets(num_starts: usize, edge_list: EdgeList) ->  Vec<(NodeId
     let array: AdjacencyArray = edge_list.into();
     let mut data: DijkstraData = DijkstraData::new(array.num_nodes());
     let mut dij: Dijkstra<DirectedWeightedEdge, AdjacencyArray> = Dijkstra::new(&array, &mut data);
-    let mut rng = rand::thread_rng();
+    let rng = rand::thread_rng();
     let starts: Vec<NodeId> = distr.sample_iter(rng)
                                    .take(num_starts)
                                    .collect();
@@ -82,7 +84,7 @@ pub fn ch_from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>) {
     let mut data1: DijkstraData = DijkstraData::new(edge_list.num_nodes());
     let mut data2: DijkstraData = DijkstraData::new(edge_list.num_nodes());
     let now: Instant = Instant::now();
-    let _ch: CHGraph = CHGraph::from_ordering(edge_list, ordering, &mut data1, &mut data2);
+    let _ch: CHGraph = CHGraph::from_ordering(edge_list, ordering, &mut data1, &mut data2, ContractionConfig::default());
     let elapsed: Duration = now.elapsed();    
     println!("{:?}", elapsed);
 }
@@ -92,7 +94,7 @@ pub fn ch_bottom_up(edge_list: EdgeList) {
     let mut data1: DijkstraData = DijkstraData::new(edge_list.num_nodes());
     let mut data2: DijkstraData = DijkstraData::new(edge_list.num_nodes());
     let now: Instant = Instant::now();
-    let _ch: (_, _) = CHGraph::bottom_up_construction(edge_list, &mut data1, &mut data2);
+    let _ch: (_, _) = CHGraph::bottom_up_construction(edge_list, &mut data1, &mut data2, ContractionConfig::default(), BottomUpConfig::default());
     let elapsed: Duration = now.elapsed();    
     println!("{:?}", elapsed);
 }

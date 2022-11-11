@@ -1,6 +1,6 @@
 use std::{collections::BinaryHeap, marker::PhantomData};
 
-use crate::{graph::{definitions::*, nodes_edges::*, adjacency_list::*, edge_list::{self, EdgeList}, adjacency_array::AdjacencyArray}, datastructure::timestamped_vector::TimestampedVector};
+use crate::{graph::{definitions::*, nodes_edges::*, adjacency_list::*, edge_list::{EdgeList}, adjacency_array::AdjacencyArray}, datastructure::timestamped_vector::TimestampedVector};
 
 const INVALID_PARENT: NodeId = NodeId::MAX;
 pub const INFINITY: Distance = Distance::MAX;
@@ -190,8 +190,8 @@ impl BidirektionalStop for WitnessSearchStop {
 pub struct CHSearchStop {}
 
 impl BidirektionalStop for CHSearchStop {
-    fn new(config: &DijkstraConfig) -> Self { CHSearchStop {} }
-    fn finished<'a, Edge, G>(&mut self, fwd_dij :&Dijkstra<'a, Edge, G>, bwd_dij :&Dijkstra<'a, Edge, G>, _tentative_distance: Distance, settled: NodeId) -> bool 
+    fn new(_config: &DijkstraConfig) -> Self { CHSearchStop {} }
+    fn finished<'a, Edge, G>(&mut self, fwd_dij :&Dijkstra<'a, Edge, G>, bwd_dij :&Dijkstra<'a, Edge, G>, _tentative_distance: Distance, _settled: NodeId) -> bool 
     where Edge: Arc + Weighted, G: Graph + IncidentEdges<Edge>
     {   //search fronts reach cap or a node is settled from both sides -> stop from slides for bidirectional witness search
         return (fwd_dij.pq.is_empty() && bwd_dij.pq.is_empty()) || 
@@ -404,6 +404,7 @@ Edge: Arc + Weighted
             }
             steps += 1;
             let node_id = settled_node.unwrap() as usize;
+            last_settled = settled_node.unwrap();
             let fwd_dist = fwd_dij.distances[node_id];
             let bwd_dist = bwd_dij.distances[node_id];
             match dir {

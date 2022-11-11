@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use stud_rust_base::ch::ch_graph::CHGraphRunner;
+use stud_rust_base::ch::contraction::{BottomUpConfig, ContractionConfig};
 use stud_rust_base::dijkstra::*;
 use stud_rust_base::graph::{definitions::*, edge_list::{*}, nodes_edges::*, adjacency_array::AdjacencyArray};
 
@@ -59,8 +60,9 @@ fn exercise3(args : &Args) {
     let (source, target) = report_time("Reading source target", || { read_source_target(&args.source_target)}); 
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
     let path_ordering: &String = args.ordering.as_ref().unwrap();
+    let config: ContractionConfig = ContractionConfig::new(args.witness_pre, args.witness_full);
     let ordering: Vec<NodeId> = report_time("Reading Ordering", || {Vec::<NodeId>::load_from(path_ordering).unwrap()}); 
-    let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::from_ordering(edge_list, ordering)});
+    let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::from_ordering(edge_list, ordering, config)});
     compute_distances(ch, &source, &target, &args.out_folder);
 }
 
@@ -68,7 +70,9 @@ fn exercise3(args : &Args) {
 fn exercise4(args : &Args) {
     let (source, target) = report_time("Reading source target", || { read_source_target(&args.source_target)}); 
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
-    let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::bottom_up(edge_list)});
+    let config1: ContractionConfig = ContractionConfig::new(args.witness_pre, args.witness_full);
+    let config2: BottomUpConfig = BottomUpConfig::new(args.lazy, args.update_interval, args.fraction_pops);
+    let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::bottom_up(edge_list, config1, config2)});
     compute_distances(ch, &source, &target, &args.out_folder);
 }
 
@@ -114,6 +118,14 @@ struct Args {
     #[clap(long, default_value_t=true)]
     /// use lazy variant of bottom up construction
     lazy: bool,
+
+    #[clap(long, default_value_t=1000)]
+    /// length of intervals in lazy variant to check for updating all nodes
+    update_interval: usize,
+   
+    #[clap(long, default_value_t=1.0f64)]
+    /// trigger update in lazy variant if "fraction_pops" * "update_interval" <= successful pops
+    fraction_pops: f64,
 }
 
 fn main(){

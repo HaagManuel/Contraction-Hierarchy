@@ -1,12 +1,11 @@
 use crate::dijkstra::*;
-use crate::graph::adjacency_array::{self, AdjacencyArray};
-use crate::graph::adjacency_list::{self, AdjacencyList};
+use crate::graph::adjacency_array::{AdjacencyArray};
+use crate::graph::adjacency_list::{AdjacencyList};
 use crate::graph::edge_list::*;
 use crate::graph::nodes_edges::*;
-use crate::graph::*;
 use crate::graph::definitions::*;
 
-use super::contraction::{Contraction};
+use super::contraction::{Contraction, BottomUpConfig, ContractionConfig};
 
 pub struct CHGraph {
     fwd_graph: AdjacencyArray,
@@ -15,7 +14,7 @@ pub struct CHGraph {
 
 impl CHGraph {
 
-    //inverts permutation
+    /// inverts permutation
     fn ranks_from_ordering(ordering: &Vec<NodeId>) -> Vec<NodeId> {
         let mut ranks: Vec<NodeId> = vec![0; ordering.len()];
         for i in 0..ordering.len() {
@@ -33,48 +32,32 @@ impl CHGraph {
         return CHGraph { fwd_graph: fwd_list.into() , bwd_graph: bwd_list.into()};
     }
 
-    pub fn from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>, dij_data1: &mut DijkstraData, dij_data2: &mut DijkstraData) -> Self {
+    pub fn from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>, dij_data1: &mut DijkstraData, dij_data2: &mut DijkstraData, config: ContractionConfig) -> Self {
         let rev_edge_list: EdgeList = edge_list.reverse_edge_list();
 
         let mut fwd_list: AdjacencyList = edge_list.into();
         let mut bwd_list: AdjacencyList = rev_edge_list.into();
 
-        let mut builder: Contraction = Contraction::new(&mut fwd_list, &mut bwd_list, dij_data1, dij_data2);
+        let mut builder: Contraction = Contraction::new(&mut fwd_list, &mut bwd_list, dij_data1, dij_data2, config);
         builder.contract_ordering(ordering);
         
         fwd_list.sort_lists(); // sorting is destroyed during contraction
         bwd_list.sort_lists();
 
-        // println!("fwd ch");
-        // fwd_list.print();
-        // println!(" ");
-
-        // println!("bwd ch");
-        // bwd_list.print();
-        // println!(" ");
-
         CHGraph{ fwd_graph: fwd_list.into(), bwd_graph: bwd_list.into() }
     }
 
-    pub fn bottom_up_construction(edge_list: EdgeList, dij_data1: &mut DijkstraData, dij_data2: &mut DijkstraData) -> (Self, Vec<NodeId>) {
+    pub fn bottom_up_construction(edge_list: EdgeList, dij_data1: &mut DijkstraData, dij_data2: &mut DijkstraData, contraction_config: ContractionConfig, bottom_up_config: BottomUpConfig) -> (Self, Vec<NodeId>) {
         let rev_edge_list: EdgeList = edge_list.reverse_edge_list();
 
         let mut fwd_list: AdjacencyList = edge_list.into();
         let mut bwd_list: AdjacencyList = rev_edge_list.into();
 
-        let mut builder: Contraction = Contraction::new(&mut fwd_list, &mut bwd_list, dij_data1, dij_data2);
-        let ordering = builder.bottom_up(true);
+        let mut builder: Contraction = Contraction::new(&mut fwd_list, &mut bwd_list, dij_data1, dij_data2, contraction_config);
+        let ordering = builder.bottom_up(bottom_up_config);
         
         fwd_list.sort_lists(); // sorting is destroyed during contraction
         bwd_list.sort_lists();
-        
-        // println!("fwd ch");
-        // fwd_list.print();
-        // println!(" ");
-
-        // println!("bwd ch");
-        // bwd_list.print();
-        // println!(" ");
 
         (CHGraph{ fwd_graph: fwd_list.into(), bwd_graph: bwd_list.into()}, ordering)
     }
@@ -83,7 +66,6 @@ impl CHGraph {
     pub fn one_to_one(&self, start: NodeId, target: NodeId, dij_data1: &mut DijkstraData, dij_data2: &mut DijkstraData) -> Distance {
         let mut fwd_dij: Dijkstra<DirectedWeightedEdge, AdjacencyArray> = Dijkstra::new(&self.fwd_graph, dij_data1);
         let mut bwd_dij: Dijkstra<DirectedWeightedEdge, AdjacencyArray> = Dijkstra::new(&self.bwd_graph, dij_data2);
-        // return Dijkstra::bidrektional_dijkstra::<Alternating, CHSearchStop>(start, target, &mut fwd_dij, &mut bwd_dij);
         return Dijkstra::bidrektional_dijkstra::<SmallerQueueKey, CHSearchStop>(start, target, &mut fwd_dij, &mut bwd_dij);
     }
 
@@ -123,20 +105,20 @@ impl CHGraphRunner {
             ch: ch}
     }
 
-    pub fn from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>) -> Self {
+    pub fn from_ordering(edge_list: EdgeList, ordering: Vec<NodeId>, config: ContractionConfig) -> Self {
         let mut data1: DijkstraData = DijkstraData::new(edge_list.num_nodes());
         let mut data2: DijkstraData = DijkstraData::new(edge_list.num_nodes());
-        let ch: CHGraph =  CHGraph::from_ordering(edge_list, ordering, &mut data1, &mut data2);
+        let ch: CHGraph =  CHGraph::from_ordering(edge_list, ordering, &mut data1, &mut data2, config);
         CHGraphRunner { 
             data1: data1, 
             data2: data2, 
             ch: ch}
     }
 
-    pub fn bottom_up(edge_list: EdgeList) -> Self {
+    pub fn bottom_up(edge_list: EdgeList, contraction_config: ContractionConfig, bottom_up_config: BottomUpConfig) -> Self {
         let mut data1: DijkstraData = DijkstraData::new(edge_list.num_nodes());
         let mut data2: DijkstraData = DijkstraData::new(edge_list.num_nodes());
-        let (ch, _) =  CHGraph::bottom_up_construction(edge_list, &mut data1, &mut data2);
+        let (ch, _) =  CHGraph::bottom_up_construction(edge_list, &mut data1, &mut data2, contraction_config, bottom_up_config);
         CHGraphRunner { 
             data1: data1, 
             data2: data2, 
