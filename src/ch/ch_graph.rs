@@ -25,10 +25,19 @@ impl CHGraph {
 
     pub fn from_augmented_graph(edge_list: EdgeList, ordering: Vec<NodeId>) -> Self {
         let ranks: Vec<NodeId> = CHGraph::ranks_from_ordering(&ordering);
-        let mut edges: Vec<(NodeId, DirectedWeightedEdge)> = edge_list.edges;
-        edges = edges.into_iter().filter(|&(from, e)| ranks[from as usize] < ranks[e.to as usize]).collect();
-        let fwd_list: EdgeList = edges.into();
-        let bwd_list: EdgeList = fwd_list.reverse_edge_list();
+        let edges: Vec<(NodeId, DirectedWeightedEdge)> = edge_list.edges;
+        let mut fwd_edges: Vec<(NodeId, DirectedWeightedEdge)> = Vec::new();
+        let mut bwd_edges: Vec<(NodeId, DirectedWeightedEdge)> = Vec::new();
+        for (from, e) in edges {
+            if ranks[from as usize] < ranks[e.to as usize] {
+                fwd_edges.push((from, DirectedWeightedEdge::from_values(e.to, e.weight)));
+            }
+            else {
+                bwd_edges.push((e.to, DirectedWeightedEdge::from_values(from, e.weight)));
+            }
+        }
+        let fwd_list: EdgeList = fwd_edges.into();
+        let bwd_list: EdgeList = bwd_edges.into();
         return CHGraph { fwd_graph: fwd_list.into() , bwd_graph: bwd_list.into()};
     }
 

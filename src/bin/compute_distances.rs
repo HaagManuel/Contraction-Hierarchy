@@ -29,7 +29,7 @@ fn compute_distances<T: OneToOne>(mut algo: T, source: &Vec<NodeId>, target: &Ve
             result[i] = algo.one_to_one(*s, *t);
         }
     });
-    
+
     report_time("Write Results", || {
         eprintln!("{:?}", path_out);
         write_result(path_out, result);
@@ -107,11 +107,11 @@ struct Args {
     /// file in which to write the distances between the source/target pairs
     out_folder: String,
     
-    #[clap(long, default_value_t=100)]
+    #[clap(long, default_value_t=1000)]
     /// maximal number of nodes visited in witness search for nodes in pq during bottom up construction
     witness_pre: usize,
     
-    #[clap(long, default_value_t=10000)]
+    #[clap(long, default_value_t=10_000)]
     /// maximal number of nodes visited in witness search for nodes during contraction
     witness_full: usize,
 

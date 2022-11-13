@@ -67,8 +67,6 @@ impl Indexing for State {
     }
 }
 
-
-
 impl<'a> Contraction<'a> {
     pub fn new(fwd_gr: &'a mut AdjacencyList, bwd_gr: &'a mut AdjacencyList, _dij_data1: &'a mut DijkstraData, _dij_data2: &'a mut DijkstraData, config: ContractionConfig) -> Self {
         Contraction { 
@@ -89,7 +87,6 @@ impl<'a> Contraction<'a> {
         }
     }
 
-    //maybe only to higher order nodes? -> test with id ordering
     fn remove_incoming_edges(&mut self, node: NodeId) {
         let node_id: usize = node as usize;
         //remove v --> node in fwd
