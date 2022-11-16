@@ -14,6 +14,9 @@ do
         CUR="${DIR}/${G}"
         TEST="${CUR}/test/${M}_length"
 
+        OUT="./outputs/a2/${G}/${M}_length"
+        $PROG $TEST $OUT
+
         OUT="./outputs/a3/${G}/${M}_length"
         $PROG $TEST $OUT
 

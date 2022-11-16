@@ -30,6 +30,6 @@ do
 
         OUT="./outputs/a4/${G}/${M}_length"
         mkdir -p "./outputs/a4/${G}/"
-        echo "$PROG -e 4 -g $CUR -w $WEIGHT -s $SOURCE -o $OUT"
+        echo "$PROG -e 4 -g $CUR -w $WEIGHT -s $SOURCE -o $OUT  --lazy"
     done
 done
