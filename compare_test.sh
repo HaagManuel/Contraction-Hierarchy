@@ -2,8 +2,8 @@
 
 DIR="/algoDaten/praktikum/graph"
 #GRAPHS="europe  germany  karlsruhe  stupferich"
-#GRAPHS="stupferich karlsruhe germany"
-GRAPHS="stupferich karlsruhe"
+GRAPHS="stupferich karlsruhe germany"
+#GRAPHS="stupferich karlsruhe"
 PROG="cargo run --bin compare_vector i32 "
 METRIC="travel_time geo_distance"
 
