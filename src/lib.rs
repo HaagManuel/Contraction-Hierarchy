@@ -13,3 +13,4 @@ pub mod datastructure;
 pub mod dijkstra;
 pub mod graph_gen;
 pub mod graph;
+pub mod logging;

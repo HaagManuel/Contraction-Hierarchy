@@ -7,6 +7,7 @@ use stud_rust_base::graph::{definitions::*, edge_list::{*}, nodes_edges::*, adja
 
 use stud_rust_base::io::*;
 use stud_rust_base::time::report_time;
+use stud_rust_base::logging::report_progress;
 
 use clap::Parser;
 
@@ -25,7 +26,7 @@ fn compute_distances<T: OneToOne>(mut algo: T, source: &Vec<NodeId>, target: &Ve
     let mut result: Vec<Distance> = vec![0; source.len()];
     report_time("compute distances", || {
         for (i, (s,t)) in std::iter::zip(source.iter(), target.iter()).enumerate() {
-            if i % 10000 == 0 { eprintln!("{}/{}", i, source.len()); }
+            report_progress(i, source.len(), "", 10);
             result[i] = algo.one_to_one(*s, *t);
         }
     });
@@ -51,7 +52,7 @@ fn exercise2(args : &Args) {
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
     let path_ordering: &String = args.ordering.as_ref().unwrap();
     let ordering: Vec<NodeId> = report_time("Reading Ordering", || {Vec::<NodeId>::load_from(path_ordering).unwrap()}); 
-    let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::from_augmented_graph(edge_list, ordering)});
+    let ch: CHGraphRunner = report_time("ch from augmented", || {CHGraphRunner::from_augmented_graph(edge_list, ordering)});
     compute_distances(ch, &source, &target, &args.out_folder);
 }
 
@@ -62,7 +63,7 @@ fn exercise3(args : &Args) {
     let path_ordering: &String = args.ordering.as_ref().unwrap();
     let config: ContractionConfig = ContractionConfig::new(args.witness_pre, args.witness_full);
     let ordering: Vec<NodeId> = report_time("Reading Ordering", || {Vec::<NodeId>::load_from(path_ordering).unwrap()}); 
-    let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::from_ordering(edge_list, ordering, config)});
+    let ch: CHGraphRunner = report_time("ch from ordering", || {CHGraphRunner::from_ordering(edge_list, ordering, config)});
     compute_distances(ch, &source, &target, &args.out_folder);
 }
 
@@ -115,7 +116,7 @@ struct Args {
     /// maximal number of nodes visited in witness search for nodes during contraction
     witness_full: usize,
 
-    #[clap(long, default_value_t=true)]
+    #[clap(long)]
     /// use lazy variant of bottom up construction
     lazy: bool,
 

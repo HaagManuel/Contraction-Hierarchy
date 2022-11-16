@@ -6,6 +6,8 @@ use crate::graph::definitions::*;
 use crate::graph::nodes_edges::*;
 use crate::datastructure::index_heap::*;
 
+use crate::logging::report_progress;
+
 pub struct ContractionConfig {
     max_witness_search_heuristic: usize,
     max_witness_search_steps: usize,
@@ -207,6 +209,7 @@ impl<'a> Contraction<'a> {
     }
 
     fn lazy_bottom_up(&mut self, config: BottomUpConfig) -> Vec<NodeId> {
+        eprintln!("lazy bottom up construction");
         let n: usize = self.fwd_graph.num_nodes();
         let mut ordering: Vec<NodeId> = Vec::new(); //unimportant nodes first
         let mut level: Vec<NodeId> = vec![0; n];
@@ -225,7 +228,6 @@ impl<'a> Contraction<'a> {
         let frac: f64 = config.fraction_pops;
         
         while !heap.is_empty() {
-            if ordering.len() % 10000 == 0 { println!("{}/{n}, pq {}, shortcuts {}", ordering.len(), heap.len(), self.num_shortcuts);}
             count_round += 1;
             if count_round % interval == 0 { 
                 count_round = 0;
@@ -254,12 +256,14 @@ impl<'a> Contraction<'a> {
             self.contract_node(v);
             self.update_level(v, &mut level);
             count_pops += 1;
+            report_progress(ordering.len(), n, format!("--> number of shortcuts {}", self.num_shortcuts).as_str(), 10);
         }
         return ordering;
     }
 
     //computes ordering and applies contraction to graphs
     fn simple_bottom_up(&mut self) -> Vec<NodeId> {
+        eprintln!("simple bottom up construction");
         let n: usize = self.fwd_graph.num_nodes();
         let mut ordering: Vec<NodeId> = Vec::new(); //unimportant nodes first
         let mut level: Vec<NodeId> = vec![0; n];
@@ -276,7 +280,6 @@ impl<'a> Contraction<'a> {
 
         //pop and assign node with min heuristic ~ low number of shortcuts
         while !heap.is_empty() {
-            if ordering.len() % 10000 == 0 { println!("{}/{n}, pq {}, shortcuts {}", ordering.len(), heap.len(), self.num_shortcuts);}
             let v: NodeId = heap.pop().unwrap().node;
             let v_id: usize = v as usize;
             ordering.push(v);
@@ -296,6 +299,7 @@ impl<'a> Contraction<'a> {
                     heap.update_key(State { heuristic: self.net_gain_edges(w, &level), node: w });
                 }
             }
+            report_progress(ordering.len(), n, format!("--> number of shortcuts {}", self.num_shortcuts).as_str(), 10);
         }
         return ordering;
     }
