@@ -6,10 +6,10 @@ METRIC="travel_time geo_distance"
 
 for M in $METRIC
 do
-    for EX in "1 2 3 4"
-    do
-         mkdir -p "./abgabe/aufgabe${EX}/${M}_length"
-    done
+    mkdir -p "./abgabe/aufgabe1"
+    mkdir -p "./abgabe/aufgabe2"
+    mkdir -p "./abgabe/aufgabe3"
+    mkdir -p "./abgabe/aufgabe4"
 
     #exercise 1
     CUR="${DIR}/aufgabe1"
