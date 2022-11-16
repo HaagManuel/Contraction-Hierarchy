@@ -37,10 +37,16 @@ fn compute_distances<T: OneToOne>(mut algo: T, source: &Vec<NodeId>, target: &Ve
     });
 }
 
+fn report_graph(edge_list: &EdgeList) {
+    eprintln!("--> N = {}, M = {}", edge_list.num_nodes(), edge_list.num_arcs());
+    eprintln!("");
+}
+
 /// computes distances with dijkstra
 fn exercise1(args : &Args) {
     let (source, target) = report_time("Reading source target", || { read_source_target(&args.source_target)}); 
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
+    report_graph(&edge_list);
     let array: AdjacencyArray= edge_list.into();
     let dij: DijkstraRunner<DirectedWeightedEdge, AdjacencyArray> = DijkstraRunner::new(&array);
     compute_distances(dij, &source, &target, &args.out_folder);
@@ -50,6 +56,7 @@ fn exercise1(args : &Args) {
 fn exercise2(args : &Args) {
     let (source, target) = report_time("Reading source target", || { read_source_target(&args.source_target)}); 
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
+    report_graph(&edge_list);
     let path_ordering: &String = args.ordering.as_ref().unwrap();
     let ordering: Vec<NodeId> = report_time("Reading Ordering", || {Vec::<NodeId>::load_from(path_ordering).unwrap()}); 
     let ch: CHGraphRunner = report_time("ch from augmented", || {CHGraphRunner::from_augmented_graph(edge_list, ordering)});
@@ -60,6 +67,7 @@ fn exercise2(args : &Args) {
 fn exercise3(args : &Args) {
     let (source, target) = report_time("Reading source target", || { read_source_target(&args.source_target)}); 
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
+    report_graph(&edge_list);
     let path_ordering: &String = args.ordering.as_ref().unwrap();
     let config: ContractionConfig = ContractionConfig::new(args.witness_pre, args.witness_full);
     let ordering: Vec<NodeId> = report_time("Reading Ordering", || {Vec::<NodeId>::load_from(path_ordering).unwrap()}); 
@@ -71,6 +79,7 @@ fn exercise3(args : &Args) {
 fn exercise4(args : &Args) {
     let (source, target) = report_time("Reading source target", || { read_source_target(&args.source_target)}); 
     let edge_list: EdgeList = report_time("Reading Graph", || {read_binary_graph(&args.graph, &args.weight).into()}); 
+    report_graph(&edge_list);
     let config1: ContractionConfig = ContractionConfig::new(args.witness_pre, args.witness_full);
     let config2: BottomUpConfig = BottomUpConfig::new(args.lazy, args.update_interval, args.fraction_pops);
     let ch: CHGraphRunner = report_time("ch bottom up", || {CHGraphRunner::bottom_up(edge_list, config1, config2)});
