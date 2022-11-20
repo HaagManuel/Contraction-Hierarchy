@@ -1,0 +1,1 @@
+cargo run --release --bin compute_distances --  -e 4 -g /algoDaten/praktikum/graph/aufgabe4 -w /algoDaten/praktikum/graph/aufgabe4/geo_distance -s /algoDaten/praktikum/graph/aufgabe4/test -o ./abgabe/aufgabe4/geo_distance_length --lazy --update-interval 10000 --witness-pre 100 --witness-full 1000

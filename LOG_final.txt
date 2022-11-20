@@ -1,0 +1,248 @@
+    Finished release [optimized] target(s) in 0.27s
+     Running `target/release/compute_distances -e 1 -g /algoDaten/praktikum/graph/aufgabe1 -w /algoDaten/praktikum/graph/aufgabe1/travel_time -s /algoDaten/praktikum/graph/aufgabe1/test -o ./abgabe/aufgabe1/travel_time_length`
+Args { exercise_nr: 1, graph: "/algoDaten/praktikum/graph/aufgabe1", weight: "/algoDaten/praktikum/graph/aufgabe1/travel_time", ordering: None, source_target: "/algoDaten/praktikum/graph/aufgabe1/test", out_folder: "./abgabe/aufgabe1/travel_time_length", witness_pre: 1000, witness_full: 10000, lazy: false, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.007489918s
+
+starting Reading Graph
+done Reading Graph - took: 0.803870621s
+
+--> N = 5763063, M = 13984846
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 2113.338412911s
+
+starting Write Results
+"./abgabe/aufgabe1/travel_time_length"
+done Write Results - took: 0.003996225s
+
+    Finished release [optimized] target(s) in 0.50s
+     Running `target/release/compute_distances -e 2 -g /algoDaten/praktikum/graph/aufgabe2/travel_time_ch -w /algoDaten/praktikum/graph/aufgabe2/travel_time_ch/weight -s /algoDaten/praktikum/graph/aufgabe2/test -o ./abgabe/aufgabe2/travel_time_length --ordering /algoDaten/praktikum/graph/aufgabe2/travel_time_ch/order`
+Args { exercise_nr: 2, graph: "/algoDaten/praktikum/graph/aufgabe2/travel_time_ch", weight: "/algoDaten/praktikum/graph/aufgabe2/travel_time_ch/weight", ordering: Some("/algoDaten/praktikum/graph/aufgabe2/travel_time_ch/order"), source_target: "/algoDaten/praktikum/graph/aufgabe2/test", out_folder: "./abgabe/aufgabe2/travel_time_length", witness_pre: 1000, witness_full: 10000, lazy: false, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.809570508s
+
+starting Reading Graph
+done Reading Graph - took: 19.059509937s
+
+--> N = 5763063, M = 23345403
+
+starting Reading Ordering
+done Reading Ordering - took: 1.981545718s
+
+starting ch from augmented
+done ch from augmented - took: 4.617179394s
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 410.338753589s
+
+starting Write Results
+"./abgabe/aufgabe2/travel_time_length"
+done Write Results - took: 0.349629118s
+
+    Finished release [optimized] target(s) in 0.57s
+     Running `target/release/compute_distances -e 3 -g /algoDaten/praktikum/graph/aufgabe3 -w /algoDaten/praktikum/graph/aufgabe3/travel_time -s /algoDaten/praktikum/graph/aufgabe3/test -o ./abgabe/aufgabe3/travel_time_length --ordering /algoDaten/praktikum/graph/aufgabe3/travel_time_ch/order`
+Args { exercise_nr: 3, graph: "/algoDaten/praktikum/graph/aufgabe3", weight: "/algoDaten/praktikum/graph/aufgabe3/travel_time", ordering: Some("/algoDaten/praktikum/graph/aufgabe3/travel_time_ch/order"), source_target: "/algoDaten/praktikum/graph/aufgabe3/test", out_folder: "./abgabe/aufgabe3/travel_time_length", witness_pre: 1000, witness_full: 10000, lazy: false, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.702880403s
+
+starting Reading Graph
+done Reading Graph - took: 12.246655436s
+
+--> N = 5763063, M = 13984846
+
+starting Reading Ordering
+done Reading Ordering - took: 1.98244134s
+
+starting ch from ordering
+done ch from ordering - took: 90.450325783s
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 413.860558939s
+
+starting Write Results
+"./abgabe/aufgabe3/travel_time_length"
+done Write Results - took: 0.349767019s
+
+    Finished release [optimized] target(s) in 0.45s
+     Running `target/release/compute_distances -e 4 -g /algoDaten/praktikum/graph/aufgabe4 -w /algoDaten/praktikum/graph/aufgabe4/travel_time -s /algoDaten/praktikum/graph/aufgabe4/test -o ./abgabe/aufgabe4/travel_time_length --lazy`
+Args { exercise_nr: 4, graph: "/algoDaten/praktikum/graph/aufgabe4", weight: "/algoDaten/praktikum/graph/aufgabe4/travel_time", ordering: None, source_target: "/algoDaten/praktikum/graph/aufgabe4/test", out_folder: "./abgabe/aufgabe4/travel_time_length", witness_pre: 1000, witness_full: 10000, lazy: true, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.699748448s
+
+starting Reading Graph
+done Reading Graph - took: 12.236575897s
+
+--> N = 5763063, M = 13984846
+
+starting ch bottom up
+lazy bottom up construction
+10% --> number of shortcuts 63176
+20% --> number of shortcuts 129444
+30% --> number of shortcuts 524490
+40% --> number of shortcuts 1424078
+50% --> number of shortcuts 2858222
+60% --> number of shortcuts 4411934
+70% --> number of shortcuts 6201825
+80% --> number of shortcuts 7824562
+90% --> number of shortcuts 9362374
+100% --> number of shortcuts 12073793
+done ch bottom up - took: 388.59703449s
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 1089.014376931s
+
+starting Write Results
+"./abgabe/aufgabe4/travel_time_length"
+done Write Results - took: 0.350340378s
+
+    Finished release [optimized] target(s) in 0.57s
+     Running `target/release/compute_distances -e 1 -g /algoDaten/praktikum/graph/aufgabe1 -w /algoDaten/praktikum/graph/aufgabe1/geo_distance -s /algoDaten/praktikum/graph/aufgabe1/test -o ./abgabe/aufgabe1/geo_distance_length`
+Args { exercise_nr: 1, graph: "/algoDaten/praktikum/graph/aufgabe1", weight: "/algoDaten/praktikum/graph/aufgabe1/geo_distance", ordering: None, source_target: "/algoDaten/praktikum/graph/aufgabe1/test", out_folder: "./abgabe/aufgabe1/geo_distance_length", witness_pre: 1000, witness_full: 10000, lazy: false, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.090164488s
+
+starting Reading Graph
+done Reading Graph - took: 12.211897683s
+
+--> N = 5763063, M = 13984846
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 1671.175552464s
+
+starting Write Results
+"./abgabe/aufgabe1/geo_distance_length"
+done Write Results - took: 0.004365173s
+
+    Finished release [optimized] target(s) in 0.56s
+     Running `target/release/compute_distances -e 2 -g /algoDaten/praktikum/graph/aufgabe2/geo_distance_ch -w /algoDaten/praktikum/graph/aufgabe2/geo_distance_ch/weight -s /algoDaten/praktikum/graph/aufgabe2/test -o ./abgabe/aufgabe2/geo_distance_length --ordering /algoDaten/praktikum/graph/aufgabe2/geo_distance_ch/order`
+Args { exercise_nr: 2, graph: "/algoDaten/praktikum/graph/aufgabe2/geo_distance_ch", weight: "/algoDaten/praktikum/graph/aufgabe2/geo_distance_ch/weight", ordering: Some("/algoDaten/praktikum/graph/aufgabe2/geo_distance_ch/order"), source_target: "/algoDaten/praktikum/graph/aufgabe2/test", out_folder: "./abgabe/aufgabe2/geo_distance_length", witness_pre: 1000, witness_full: 10000, lazy: false, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.821121536s
+
+starting Reading Graph
+done Reading Graph - took: 22.252730148s
+
+--> N = 5763063, M = 27776512
+
+starting Reading Ordering
+done Reading Ordering - took: 1.9783523060000001s
+
+starting ch from augmented
+done ch from augmented - took: 5.377171235s
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 4422.081053208s
+
+starting Write Results
+"./abgabe/aufgabe2/geo_distance_length"
+done Write Results - took: 0.349254178s
+
+    Finished release [optimized] target(s) in 0.57s
+     Running `target/release/compute_distances -e 3 -g /algoDaten/praktikum/graph/aufgabe3 -w /algoDaten/praktikum/graph/aufgabe3/geo_distance -s /algoDaten/praktikum/graph/aufgabe3/test -o ./abgabe/aufgabe3/geo_distance_length --ordering /algoDaten/praktikum/graph/aufgabe3/geo_distance_ch/order`
+Args { exercise_nr: 3, graph: "/algoDaten/praktikum/graph/aufgabe3", weight: "/algoDaten/praktikum/graph/aufgabe3/geo_distance", ordering: Some("/algoDaten/praktikum/graph/aufgabe3/geo_distance_ch/order"), source_target: "/algoDaten/praktikum/graph/aufgabe3/test", out_folder: "./abgabe/aufgabe3/geo_distance_length", witness_pre: 1000, witness_full: 10000, lazy: false, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.792924965s
+
+starting Reading Graph
+done Reading Graph - took: 12.248141535s
+
+--> N = 5763063, M = 13984846
+
+starting Reading Ordering
+done Reading Ordering - took: 1.976554537s
+
+starting ch from ordering
+done ch from ordering - took: 388.250171163s
+
+starting compute distances
+0% 
+10% 
+20% 
+30% 
+40% 
+50% 
+60% 
+70% 
+80% 
+90% 
+done compute distances - took: 4473.735021678s
+
+starting Write Results
+"./abgabe/aufgabe3/geo_distance_length"
+done Write Results - took: 0.349401947s
+
+    Finished release [optimized] target(s) in 0.56s
+     Running `target/release/compute_distances -e 4 -g /algoDaten/praktikum/graph/aufgabe4 -w /algoDaten/praktikum/graph/aufgabe4/geo_distance -s /algoDaten/praktikum/graph/aufgabe4/test -o ./abgabe/aufgabe4/geo_distance_length --lazy`
+Args { exercise_nr: 4, graph: "/algoDaten/praktikum/graph/aufgabe4", weight: "/algoDaten/praktikum/graph/aufgabe4/geo_distance", ordering: None, source_target: "/algoDaten/praktikum/graph/aufgabe4/test", out_folder: "./abgabe/aufgabe4/geo_distance_length", witness_pre: 1000, witness_full: 10000, lazy: true, update_interval: 1000, fraction_pops: 1.0 }
+starting Reading source target
+done Reading source target - took: 0.802054085s
+
+starting Reading Graph
+done Reading Graph - took: 12.230781148s
+
+--> N = 5763063, M = 13984846
+
+starting ch bottom up
+lazy bottom up construction
+10% --> number of shortcuts 34428
